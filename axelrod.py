@@ -3,8 +3,8 @@ import numpy as np
 
 def newNeighbourModelA(g,node):
     t=[]
-    for i in range(0,g.vcount()):
-        for j in range(g.degree(i)):
+    for i in range(0,g.vcount()):#dla kazdego noda 
+        for j in range(g.degree(i)):#dodajemy go tyle razy ile ma polaczen
             t.append(i)
     newNeighbour = node
     while(newNeighbour==node):
@@ -64,10 +64,12 @@ def evolve(g,newNeighbourFun):
 nodesNum=500
 F=3 
 q=1000 
+#tworzymy losowy graf z nodeNum*2 polaczeniami 
 g=igraph.Graph.Erdos_Renyi(n=nodesNum,m=nodesNum*2)
 
+#dla kazdej z F cech dla kazdego noda wybieramy wartosc z zakresu [0,q[ 
 for i in range(F):
-    g.vs[str(i)]=np.random.randint(0,q,nodesNum)
+    g.vs[str(i)]=np.random.randint(0,q,nodesNum)#dlaczego jako string?
 
 evolve(g,newNeighbourModelA)
 
