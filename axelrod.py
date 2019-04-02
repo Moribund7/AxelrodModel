@@ -1,4 +1,5 @@
 import igraph
+import json
 import numpy as np
 
 
@@ -63,22 +64,51 @@ def evolve(g, new_neighbour_fun):
                 g.vs[a][str(traitToChange)] = g.vs[b][str(traitToChange)]
 
 
-def main():
+def get_local_avg_clustering(g):
+    local_list=g.transitivity_local_undirected(mode='zero')
+    return sum(local_list)/len(local_list)
+
+if __name__ == "__main__":
+    #hiperparametry
+    n_realizations=10 #po ilu realizacjach dla kazdej wartosc q usredniamy
+    q_list=[2**q for q in range(2, 500, 1) if 2**q < 500] # wartosci q dla ktorych symulujemy
+    out_simulation_data=dict() # przechowuje wyniki symulacji
+
+
+
     # generacja randomowego grafu z randomowym traitami
     nodesNum = 500
     F = 3
-    q = 1000
-    # tworzymy losowy graf z nodeNum*2 polaczeniami
-    g = igraph.Graph.Erdos_Renyi(n=nodesNum, m=nodesNum * 2)
 
-    # dla kazdej z F cech dla kazdego noda wybieramy wartosc z zakresu [0,q[
-    for i in range(F):
-        g.vs[str(i)] = np.random.randint(0, q, nodesNum)  # dlaczego jako string?
+    for q in q_list:
+        global_clustering_sum=0
+        local_clustering_sum=0
+        relative_largest_component_sum=0
+        for realization in range(n_realizations):
+            # tworzymy losowy graf z nodeNum*2 polaczeniami
+            g = igraph.Graph.Erdos_Renyi(n=nodesNum, m=nodesNum * 2)
 
-    evolve(g, new_neighbour_model_a)
+            # dla kazdej z F cech dla kazdego noda wybieramy wartosc z zakresu [0,q[
+            for i in range(F):
+                g.vs[str(i)] = np.random.randint(0, q, nodesNum)  # dlaczego jako string?
 
-    print("global clustering ", g.transitivity_undirected())
-    print("largest component ", get_largest_component_size(g), get_largest_component_size(g) / nodesNum)
+            evolve(g, new_neighbour_model_a)
 
+            global_clustering =g.transitivity_undirected()
+            local_clustering = get_local_avg_clustering(g)
+            relative_largest_component=get_largest_component_size(g)/nodesNum
 
-main()
+            global_clustering_sum+=global_clustering
+            local_clustering_sum+=local_clustering
+            relative_largest_component_sum+=relative_largest_component
+
+        out_from_q_simulations=dict()
+        out_from_q_simulations={"global_clustering":global_clustering_sum/n_realizations,
+                               "local_clustering":local_clustering_sum/n_realizations,
+                                "relative_largest_component":relative_largest_component_sum/n_realizations}
+        out_simulation_data[str(q)]=out_from_q_simulations
+
+    json = json.dumps(out_simulation_data)
+    f = open("data.json", "w")
+    f.write(json)
+    f.close()
