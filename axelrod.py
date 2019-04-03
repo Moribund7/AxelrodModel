@@ -71,9 +71,9 @@ def get_local_avg_clustering(g):
 if __name__ == "__main__":
     #hiperparametry
     n_realizations=10 #po ilu realizacjach dla kazdej wartosc q usredniamy
-    q_list=[2**q for q in range(2, 500, 1) if 2**q < 500] # wartosci q dla ktorych symulujemy
+    q_list=[2**q for q in range(2, 500, 1) if 2**q > 250 and 2**q < 1050] # wartosci q dla ktorych symulujemy
     out_simulation_data=dict() # przechowuje wyniki symulacji
-
+    output_path="data"+str(q_list)+".json"
 
 
     # generacja randomowego grafu z randomowym traitami
@@ -109,6 +109,6 @@ if __name__ == "__main__":
         out_simulation_data[str(q)]=out_from_q_simulations
 
     json = json.dumps(out_simulation_data)
-    f = open("data.json", "w")
+    f = open(output_path, "w")
     f.write(json)
     f.close()
