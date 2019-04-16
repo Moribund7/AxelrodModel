@@ -72,16 +72,20 @@ def get_local_avg_clustering(g):
     local_list=g.transitivity_local_undirected(mode='zero')
     return sum(local_list)/len(local_list)
 
+#hiperparametry
+nodesNum = 500
+n_realizations=2 #po ilu realizacjach dla kazdej wartosc q usredniamy
+
 if __name__ == "__main__":
-    #hiperparametry
-    n_realizations=1 #po ilu realizacjach dla kazdej wartosc q usredniamy
+
+
     q_list=[2**q for q in range(2, 500, 1) if 2**q > 250 and 2**q < 1050] # wartosci q dla ktorych symulujemy
     out_simulation_data=dict() # przechowuje wyniki symulacji
     output_path="data"+str(q_list)+".pickle"
 
 
     # generacja randomowego grafu z randomowym traitami
-    nodesNum = 500
+
     F = 3
 
     for q in q_list:
