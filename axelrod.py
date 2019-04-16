@@ -52,7 +52,7 @@ def evolve(g, new_neighbour_fun):
         b = np.random.choice(g.neighbors(a))
         differentTraits = []
         for trait in range(F):
-            if g.vs[a][str(trait)] != g.vs[b][str(trait)]:
+            if g.vs[a][str(trait)] != g.vs[b][str(trait)]: #no asci character ?
                 differentTraits.append(trait)
         if len(differentTraits) == 0:  # takie same traity - nic się nie dzieje
             continue
