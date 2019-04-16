@@ -1,3 +1,5 @@
+import pickle
+
 import igraph
 import json
 import numpy as np
@@ -70,10 +72,10 @@ def get_local_avg_clustering(g):
 
 if __name__ == "__main__":
     #hiperparametry
-    n_realizations=10 #po ilu realizacjach dla kazdej wartosc q usredniamy
+    n_realizations=1 #po ilu realizacjach dla kazdej wartosc q usredniamy
     q_list=[2**q for q in range(2, 500, 1) if 2**q > 250 and 2**q < 1050] # wartosci q dla ktorych symulujemy
     out_simulation_data=dict() # przechowuje wyniki symulacji
-    output_path="data"+str(q_list)+".json"
+    output_path="data"+str(q_list)+".pickle"
 
 
     # generacja randomowego grafu z randomowym traitami
@@ -81,9 +83,7 @@ if __name__ == "__main__":
     F = 3
 
     for q in q_list:
-        global_clustering_sum=0
-        local_clustering_sum=0
-        relative_largest_component_sum=0
+        graphs_for_q_list=[]
         for realization in range(n_realizations):
             # tworzymy losowy graf z nodeNum*2 polaczeniami
             g = igraph.Graph.Erdos_Renyi(n=nodesNum, m=nodesNum * 2)
@@ -94,21 +94,11 @@ if __name__ == "__main__":
 
             evolve(g, new_neighbour_model_a)
 
-            global_clustering =g.transitivity_undirected()
-            local_clustering = get_local_avg_clustering(g)
-            relative_largest_component=get_largest_component_size(g)/nodesNum
+            graphs_for_q_list.append(g)
 
-            global_clustering_sum+=global_clustering
-            local_clustering_sum+=local_clustering
-            relative_largest_component_sum+=relative_largest_component
+        out_simulation_data[str(q)]=graphs_for_q_list
 
-        out_from_q_simulations=dict()
-        out_from_q_simulations={"global_clustering":global_clustering_sum/n_realizations,
-                               "local_clustering":local_clustering_sum/n_realizations,
-                                "relative_largest_component":relative_largest_component_sum/n_realizations}
-        out_simulation_data[str(q)]=out_from_q_simulations
 
-    json = json.dumps(out_simulation_data)
-    f = open(output_path, "w")
-    f.write(json)
-    f.close()
+    with open(output_path, "wb") as f:
+        pickle.dump(out_simulation_data, f)
+
