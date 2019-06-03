@@ -77,13 +77,13 @@ def get_local_avg_clustering(g):
     return sum(local_list)/len(local_list)
 
 #hiperparametry
-nodesNum = 20
-n_realizations=2 #po ilu realizacjach dla kazdej wartosc q usredniamy
+nodesNum = 500
+n_realizations=3 #po ilu realizacjach dla kazdej wartosc q usredniamy
 
 if __name__ == "__main__":
 
 
-    q_list=[10] # wartosci q dla ktorych symulujemy
+    q_list=[32,64,256,512,1024,2048,4096,8192] # wartosci q dla ktorych symulujemy
     out_simulation_data=dict() # przechowuje wyniki symulacji
     output_path="data"+str(q_list)+".pickle"
 
@@ -104,8 +104,8 @@ if __name__ == "__main__":
 
             evolve(g, new_neighbour_model_a)
 
-60
-graphs_for_q_list.append(g)
+
+        graphs_for_q_list.append(g)
 
         out_simulation_data[str(q)]=graphs_for_q_list
 
