@@ -68,6 +68,35 @@ def get_local_avg_clustering(g):
     local_list=g.transitivity_local_undirected(mode='zero')
     return sum(local_list)/len(local_list)
 
+
+def sameAtributes(g,v1,v2,F):
+    differentTraits = []
+    for trait in range(F):
+        if g.vs[v1][str(trait)] != g.vs[v2][str(trait)]:
+            differentTraits.append(trait)
+    if(len(differentTraits)==0):
+        return True
+    else:
+        return False
+
+def domain_bfs(graph, start):
+    visited, queue = set(), [start]
+    while queue:
+        vertex = queue.pop(0)
+        if (vertex not in visited) and sameAtributes(g,vertex,start,F):
+            visited.add(vertex)
+            queue.extend(set(graph.neighborhood(vertex)) - visited)
+    return visited
+
+def get_largest_domain(g):
+    nodesToCheck=set(range(0,g.vcount()))
+    while bool(n):
+        i=nodesToCheck.pop()
+        domain=domain_bfs(g,i)
+        domains.append(domain)
+        nodesToCheck=nodesToCheck-domain
+    return max([len(d[i]) for i in range(len(d))])
+
 if __name__ == "__main__":
     #hiperparametry
     n_realizations=10 #po ilu realizacjach dla kazdej wartosc q usredniamy
