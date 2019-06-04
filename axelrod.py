@@ -17,6 +17,7 @@ def new_neighbour_model_a(g, node):
         for j in range(g.degree(i)):  # dodajemy go tyle razy ile ma polaczen
             t.append(i)
     new_neighbour = node
+    i=0
     while new_neighbour == node or (new_neighbour in g.neighbors(node)):
         new_neighbour = np.random.choice(t)
     return new_neighbour
@@ -24,7 +25,6 @@ def new_neighbour_model_a(g, node):
 
 def get_largest_component_size(g):
     return max([np.size(g.components()[i]) for i in range(len(g.components()))])
-
 
 def get_num_active_connections(g):
     active_edges = 0
@@ -40,17 +40,17 @@ def get_num_active_connections(g):
                 active_edges += 1
     return active_edges / 2
 
-
 def evolve(g, new_neighbour_fun):
     frozen = False
     F = len(g.vs.attributes()) if 'label' not in g.vs.attributes() else len(g.vs.attributes())-1 #rysowanie daje label jako atrybut
     t = 0
     while not frozen:
         t += 1
-        if not (t % 10000): print("t= ", t, " active: ", numActiveConnections)
-        numActiveConnections = get_num_active_connections(g)
-        if numActiveConnections == 0:
-            frozen = True
+        if not (t % 10000):
+            numActiveConnections = get_num_active_connections(g)
+            print("t= ", t, " active: ", numActiveConnections)
+            if numActiveConnections == 0:
+                frozen = True
 
         a = np.random.randint(0, g.vcount())
         if not g.neighbors(a):
@@ -78,12 +78,12 @@ def get_local_avg_clustering(g):
 
 #hiperparametry
 nodesNum = 500
-n_realizations=3 #po ilu realizacjach dla kazdej wartosc q usredniamy
+n_realizations=2 #po ilu realizacjach dla kazdej wartosc q usredniamy
 
 if __name__ == "__main__":
 
 
-    q_list=[32,64,256,512,1024,2048,4096,8192] # wartosci q dla ktorych symulujemy
+    q_list=[32,64] # wartosci q dla ktorych symulujemy
     out_simulation_data=dict() # przechowuje wyniki symulacji
     output_path="data"+str(q_list)+".pickle"
 
@@ -103,6 +103,7 @@ if __name__ == "__main__":
                 g.vs[str(i)] = np.random.randint(0, q, nodesNum)  # dlaczego jako string?
 
             evolve(g, new_neighbour_model_a)
+            print("Frozen q = {:d}".format(q))
 
 
         graphs_for_q_list.append(g)
@@ -112,4 +113,3 @@ if __name__ == "__main__":
 
     with open(output_path, "wb") as f:
         pickle.dump(out_simulation_data, f)
-
