@@ -6,6 +6,10 @@ import igraph
 import json
 import numpy as np
 
+def plot_graph(g):
+    g.vs["label"] = [str(g.vs["0"][i])+str(g.vs['2'][i])+str(g.vs['2'][i]) for i in range(len(g.vs['0']))]
+
+    igraph.plot(g,vertex_size=40)
 
 def new_neighbour_model_a(g, node):
     t = []
@@ -13,7 +17,8 @@ def new_neighbour_model_a(g, node):
         for j in range(g.degree(i)):  # dodajemy go tyle razy ile ma polaczen
             t.append(i)
     new_neighbour = node
-    while new_neighbour == node:
+    i=0
+    while new_neighbour == node or (new_neighbour in g.neighbors(node)):
         new_neighbour = np.random.choice(t)
     return new_neighbour
 
@@ -24,7 +29,7 @@ def get_largest_component_size(g):
 
 def get_num_active_connections(g):
     active_edges = 0
-    F = len(g.vs.attributes())
+    F = len(g.vs.attributes()) if 'label' not in g.vs.attributes() else len(g.vs.attributes())-1 #rysowanie daje label jako atrybut
     for i in range(g.vcount()):
         for j in g.neighbors(i):
             flag = False
@@ -39,7 +44,7 @@ def get_num_active_connections(g):
 
 def evolve(g, new_neighbour_fun):
     frozen = False
-    F = len(g.vs.attributes())
+    F = len(g.vs.attributes()) if 'label' not in g.vs.attributes() else len(g.vs.attributes())-1 #rysowanie daje label jako atrybut
     t = 0
     while not frozen:
         t += 1
@@ -72,6 +77,35 @@ def get_local_avg_clustering(g):
     local_list=g.transitivity_local_undirected(mode='zero')
     return sum(local_list)/len(local_list)
 
+
+def sameAtributes(g,v1,v2,F):
+    differentTraits = []
+    for trait in range(F):
+        if g.vs[v1][str(trait)] != g.vs[v2][str(trait)]:
+            differentTraits.append(trait)
+    if(len(differentTraits)==0):
+        return True
+    else:
+        return False
+
+def domain_bfs(graph, start):
+    visited, queue = set(), [start]
+    while queue:
+        vertex = queue.pop(0)
+        if (vertex not in visited) and sameAtributes(g,vertex,start,F):
+            visited.add(vertex)
+            queue.extend(set(graph.neighborhood(vertex)) - visited)
+    return visited
+
+def get_largest_domain(g):
+    nodesToCheck=set(range(0,g.vcount()))
+    while bool(n):
+        i=nodesToCheck.pop()
+        domain=domain_bfs(g,i)
+        domains.append(domain)
+        nodesToCheck=nodesToCheck-domain
+    return max([len(d[i]) for i in range(len(d))])
+
 #hiperparametry
 nodesNum = 500
 n_realizations=2 #po ilu realizacjach dla kazdej wartosc q usredniamy
@@ -101,9 +135,7 @@ if __name__ == "__main__":
             evolve(g, new_neighbour_model_a)
 
             graphs_for_q_list.append(g)
-
         out_simulation_data[str(q)]=graphs_for_q_list
-
 
     with open(output_path, "wb") as f:
         pickle.dump(out_simulation_data, f)
