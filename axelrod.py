@@ -23,6 +23,18 @@ def new_neighbour_model_a(g, node):
     return new_neighbour
 
 
+def new_neighbour_model_f(g, node):
+    t = []
+    for neighbourNode in g.neighbors(node):
+        t.append(g.neighbors(neighbourNode))
+    tFlat = [item for sublist in t for item in sublist]
+    new_neighbour = node
+    i = 0
+    while new_neighbour == node or (new_neighbour in g.neighbors(node)):
+        new_neighbour = np.random.choice(tFlat)
+    return new_neighbour
+
+
 def get_largest_component_size(g):
     return max([np.size(g.components()[i]) for i in range(len(g.components()))])
 
@@ -44,14 +56,24 @@ def get_num_active_connections(g):
 
 def evolve(g, new_neighbour_fun):
     frozen = False
-    F = len(g.vs.attributes()) if 'label' not in g.vs.attributes() else len(g.vs.attributes())-1 #rysowanie daje label jako atrybut
-    t = 0
+    F = len(g.vs.attributes()) if 'label' not in g.vs.attributes() else len(
+        g.vs.attributes()) - 1  # rysowanie daje label jako atrybut
+    t, c = 0, 0
+    tInterval, checkInterval = 10000, 20
+    # tInterval = co ile t sprawdzane są aktywne połączenia
+    # checkInterval jeśli po tylu sprawdzeniach t jest ciągle tyle samo aktywnych połączeń uznajemy że dalej się nic nie zmieni
+    activeConnectionsHistory = list(range(0, 30))  # cokolwiek niestałego
+
     while not frozen:
         t += 1
         if not (t % 10000):
             numActiveConnections = get_num_active_connections(g)
-            print("t= ", t, " active: ", numActiveConnections)
-            if numActiveConnections == 0:
+            print("q= ", q, "t= ", t, " active: ", numActiveConnections)
+            activeConnectionsHistory.append(numActiveConnections)
+
+            if (numActiveConnections == 0):
+                frozen = True
+            if (sum(activeConnectionsHistory[-checkInterval:]) / checkInterval == activeConnectionsHistory[-1]):
                 frozen = True
         a = np.random.randint(0, g.vcount())
         if not g.neighbors(a):
@@ -78,7 +100,8 @@ def get_local_avg_clustering(g):
     return sum(local_list)/len(local_list)
 
 
-def sameAtributes(g,v1,v2,F):
+def sameAtributes(g,v1,v2):
+    F = len(g.vs.attributes()) if 'label' not in g.vs.attributes() else len(g.vs.attributes()) - 1  # rysowanie daje label jako atrybut
     differentTraits = []
     for trait in range(F):
         if g.vs[v1][str(trait)] != g.vs[v2][str(trait)]:
@@ -88,23 +111,24 @@ def sameAtributes(g,v1,v2,F):
     else:
         return False
 
-def domain_bfs(graph, start):
+def domain_bfs(g, start):
     visited, queue = set(), [start]
     while queue:
         vertex = queue.pop(0)
-        if (vertex not in visited) and sameAtributes(g,vertex,start,F):
+        if (vertex not in visited) and sameAtributes(g,vertex,start):
             visited.add(vertex)
-            queue.extend(set(graph.neighborhood(vertex)) - visited)
+            queue.extend(set(g.neighborhood(vertex)) - visited)
     return visited
 
-def get_largest_domain(g):
+def get_largest_domain_size(g):
+    domains=[]
     nodesToCheck=set(range(0,g.vcount()))
-    while bool(n):
+    while bool(nodesToCheck):
         i=nodesToCheck.pop()
         domain=domain_bfs(g,i)
         domains.append(domain)
         nodesToCheck=nodesToCheck-domain
-    return max([len(d[i]) for i in range(len(d))])
+    return max([len(domains[i]) for i in range(len(domains))])
 
 #hiperparametry
 nodesNum = 500
@@ -113,7 +137,7 @@ n_realizations=2 #po ilu realizacjach dla kazdej wartosc q usredniamy
 if __name__ == "__main__":
 
 
-    q_list=[2**q for q in range(2, 500, 1) if 2**q > 250 and 2**q < 1050] # wartosci q dla ktorych symulujemy
+    q_list=[2**q for q in range(2, 500, 1) if 2**q > 3 and 2**q < 10500] # wartosci q dla ktorych symulujemy
     out_simulation_data=dict() # przechowuje wyniki symulacji
     output_path="data"+str(q_list)+".pickle"
 
