@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
+n_realizations=2 #po ilu realizacjach dla kazdej wartosc q usredniamy
 
+import datetime
 import pickle
 
 import igraph
-import json
 import numpy as np
 
 def plot_graph(g):
@@ -132,14 +133,16 @@ def get_largest_domain_size(g):
 
 #hiperparametry
 nodesNum = 500
-n_realizations=2 #po ilu realizacjach dla kazdej wartosc q usredniamy
+
 
 if __name__ == "__main__":
 
-
-    q_list=[2**q for q in range(2, 500, 1) if 2**q > 3 and 2**q < 10500] # wartosci q dla ktorych symulujemy
+    q_list = [int(np.sqrt(2) ** q) for q in range(1, 500, 1) if
+              int(np.sqrt(2) ** q) > 3 and int(np.sqrt(2) ** q) < 10500]
+    # wartosci q dla ktorych symulujemy
+    q_list[1] = 6 # podmieniamy q==5 na q==6 (ladniej wyglada na wykresie)
     out_simulation_data=dict() # przechowuje wyniki symulacji
-    output_path="data"+str(q_list)+".pickle"
+    output_path="data"+str(q_list)+str(datetime.datetime.now().timestamp())+'.pickle'
 
 
     # generacja randomowego grafu z randomowym traitami
