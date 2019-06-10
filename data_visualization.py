@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
     plt.legend()
     plt.xscale('log')
-    plt.savefig('out.pdf')
+    plt.savefig('out.png')
 
     # plt.plot(dict_of_variables["q"], dict_of_variables["global_clustering"],'o')
     # plt.show()
