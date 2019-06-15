@@ -23,16 +23,34 @@ def new_neighbour_model_a(g, node):
         new_neighbour = np.random.choice(t)
     return new_neighbour
 
-
+import random
 def new_neighbour_model_f(g, node):
+    '''
+    Wybieramy nowego sasiada node jako jednego z sasiadow jego
+    sasiadow. Jesli nie ma takich wtedy wybieramy losowy wezel
+    '''
     t = []
     for neighbourNode in g.neighbors(node):
         t.append(g.neighbors(neighbourNode))
     tFlat = [item for sublist in t for item in sublist]
-    new_neighbour = node
+    #remove node from list
+    tFlat=[x for x in tFlat if x != node]
     i = 0
+    random.shuffle(tFlat)
+    
+    for new_neighbour in tFlat:
+        if (new_neighbour == node or (new_neighbour in g.neighbors(node))):
+            pass
+        else:
+            return new_neighbour
+    
+    #return random node
+    new_neighbour = node
+    print(tFlat)
+    print("brak kolegow")
     while new_neighbour == node or (new_neighbour in g.neighbors(node)):
-        new_neighbour = np.random.choice(tFlat)
+        new_neighbour = np.random.randint(0,nodesNum)
+        
     return new_neighbour
 
 
@@ -138,7 +156,7 @@ nodesNum = 500
 if __name__ == "__main__":
 
     q_list = [int(np.sqrt(2) ** q) for q in range(1, 500, 1) if
-              int(np.sqrt(2) ** q) > 3 and int(np.sqrt(2) ** q) < 10500]
+              int(np.sqrt(2) ** q) > 15 and int(np.sqrt(2) ** q) < 10500]
     # wartosci q dla ktorych symulujemy
     q_list[1] = 6 # podmieniamy q==5 na q==6 (ladniej wyglada na wykresie)
     out_simulation_data=dict() # przechowuje wyniki symulacji
@@ -159,7 +177,7 @@ if __name__ == "__main__":
             for i in range(F):
                 g.vs[str(i)] = np.random.randint(0, q, nodesNum)  # dlaczego jako string?
 
-            evolve(g, new_neighbour_model_a)
+            evolve(g, new_neighbour_model_f)
 
             graphs_for_q_list.append(g)
         out_simulation_data[str(q)]=graphs_for_q_list
