@@ -156,7 +156,7 @@ nodesNum = 500
 if __name__ == "__main__":
 
     q_list = [int(np.sqrt(2) ** q) for q in range(1, 500, 1) if
-              int(np.sqrt(2) ** q) > 15 and int(np.sqrt(2) ** q) < 10500]
+              int(np.sqrt(2) ** q) > 3 and int(np.sqrt(2) ** q) < 10500]
     # wartosci q dla ktorych symulujemy
     q_list[1] = 6 # podmieniamy q==5 na q==6 (ladniej wyglada na wykresie)
     out_simulation_data=dict() # przechowuje wyniki symulacji
