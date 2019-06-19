@@ -1,10 +1,15 @@
+#%%
+
+import glob
 import json
 import pickle
+
 import numpy as np
+import os
 import matplotlib.pyplot as plt
-import glob
-from axelrod import get_largest_component_size, get_local_avg_clustering, get_num_active_connections, nodesNum, \
-    n_realizations,get_largest_domain_size
+from axelrod import (get_largest_component_size, get_largest_domain_size,
+                     get_local_avg_clustering, get_num_active_connections,
+                     n_realizations, nodesNum)
 
 
 def create_dict_of_variables(data):
@@ -68,7 +73,7 @@ def get_data_from_graphs(dict_of_graphs):
         relative_largest_component_sum = 0
         relative_largest_domain_sum = 0
         ##tu dodaj sume =0, sluzy do usredniania po kilku przebiegach dla danego q
-        n=n_realizations
+        n=len(dict_of_graphs[q])
         for g in dict_of_graphs[q]:
             global_clustering = g.transitivity_undirected()
             local_clustering = get_local_avg_clustering(g)
@@ -109,12 +114,27 @@ def clean_data(data):
     return dict_of_variables
 
 
-if __name__ == "__main__":
-    #wczytuje dane z pliku pickle
-    dict_of_graphs = load_all_pickle_data()
-    dict_of_data = get_data_from_graphs(dict_of_graphs)
-    dict_of_variables = clean_data(dict_of_data)
+def save_dict(data,filename):
+    json.dump( data, open( filename, 'w' ) )
 
+
+def load_dict(filename):
+    data = json.load( open( filename ) )
+    return data
+#%%
+if __name__ == "__main__":
+    JSON_NAME="model_a.json"
+    if os.path.exists(JSON_NAME):
+        pass
+    else:    
+        #wczytuje dane z pliku pickle
+        dict_of_graphs = load_all_pickle_data()
+        dict_of_data = get_data_from_graphs(dict_of_graphs)
+        dict_of_variables = clean_data(dict_of_data)
+
+        save_dict(dict_of_variables,JSON_NAME)
+#%%
+    dict_of_variables=load_dict(JSON_NAME)
     plt.figure()
 
     for element in dict_of_variables:
@@ -127,3 +147,7 @@ if __name__ == "__main__":
 
     # plt.plot(dict_of_variables["q"], dict_of_variables["global_clustering"],'o')
     # plt.show()
+
+#%%
+
+
