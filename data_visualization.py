@@ -121,10 +121,10 @@ def save_dict(data,filename):
 def load_dict(filename):
     data = json.load( open( filename ) )
     return data
-#%%
-if __name__ == "__main__":
-    JSON_NAME="model_a.json"
-    if os.path.exists(JSON_NAME):
+
+def save_data_to_json(filename):
+    filename+=".json"
+    if os.path.exists(filename):
         pass
     else:    
         #wczytuje dane z pliku pickle
@@ -132,21 +132,42 @@ if __name__ == "__main__":
         dict_of_data = get_data_from_graphs(dict_of_graphs)
         dict_of_variables = clean_data(dict_of_data)
 
-        save_dict(dict_of_variables,JSON_NAME)
-#%%
-    dict_of_variables=load_dict(JSON_NAME)
-    plt.figure()
+        save_dict(dict_of_variables,filename)
 
+def plot(dict_of_variables,filename):
+    plt.figure(figsize=(10,10))
+    legend={"global_clustering":"global clustering",
+            "local_clustering":"local clustering",
+            "relative_largest_component":"relative largest component",
+            "relative_largest_domain":"relative largest domain"}
+    line_style={"global_clustering":'-.',
+            "local_clustering":"--",
+            "relative_largest_component":":",
+            "relative_largest_domain":'o'}
+    
     for element in dict_of_variables:
         if element != "q":
-            plt.plot(dict_of_variables["q"], dict_of_variables[element], 'o', label=element)
+            plt.plot(dict_of_variables["q"], dict_of_variables[element], line_style[element], label=legend[element])
 
     plt.legend()
+    plt.grid(ls='--')
+    plt.xlim(([3,1e4]))
+    plt.ylim([0,1.0])
     plt.xscale('log')
-    plt.savefig('out.png')
+    plt.savefig(filename+'.png')
 
     # plt.plot(dict_of_variables["q"], dict_of_variables["global_clustering"],'o')
     # plt.show()
+
+#%%
+if __name__ == "__main__":
+    for filename in ["model_a","model_f"]:
+        save_data_to_json(filename)
+#%%
+        dict_of_variables=load_dict(filename+".json")
+
+        plot(dict_of_variables,filename)
+    
 
 #%%
 
